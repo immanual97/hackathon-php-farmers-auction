@@ -1,0 +1,276 @@
+<?php
+    session_start();
+    
+    if(isset($_SESSION['a']))
+    {
+        
+    }
+    else
+    {
+        header("location:..\Login\ConsumerLogin.php");
+    }
+    $edit=false;
+    $checkid=0;
+    $servername="localhost";
+    $username="root";
+    $password="";
+    $dbname="hackathon";
+    $con=mysqli_connect($servername,$username,$password,$dbname);
+    if(!$con)
+      echo mysqli_connect_error();
+
+        $sessionProfile = $_SESSION['profile_ID'];
+
+        $sql="SELECT * from product where AFlag = 0 AND Farmer_ID = $sessionProfile";
+        $result = mysqli_query($con,$sql);
+
+        $sql2="SELECT* from product where AFlag = 1 AND Farmer_ID = $sessionProfile";
+        $result2 = mysqli_query($con,$sql2);
+            
+        // For getting the user name on the side
+        
+        if(!isset($_SESSION['auction'])) {
+                $sql3="SELECT* FROM consumerdetails WHERE ConsumerID = '$sessionProfile'";
+                $result3 = mysqli_query($con,$sql3);  
+                $row3 = mysqli_fetch_assoc($result3);  
+                $name=$row3["Cname"];
+            } else {
+                $sql3="SELECT* FROM farmerdetails WHERE FarmerID = '$sessionProfile'";
+                $result3 = mysqli_query($con,$sql3);
+                $row3 = mysqli_fetch_assoc($result3);
+                $name=$row3["Fname"];
+            }
+
+
+    /*------------------------datbase vb--------------------------*/
+
+            $mysqli= new mysqli('localhost','root','','hackathon');
+
+    /*------------------------------------------------------------*/
+
+    /*------------------------SHOP CODES-----------------------------*/
+
+            if(isset($_POST['update_btn']))
+            {
+                $sid=$_POST['update_id'];
+                $edit= true;
+                $checkid= $sid ;
+            }
+            if(isset($_POST['ok_btn']))
+            {
+                $st=$_POST['update_id'];
+                $id=$_POST['hid'] ;
+                echo $id;
+                echo $st;
+                $result= $mysqli->query("update product set Stock=$st where Product_ID=$id")or 
+                                    die ($mysqli->error);
+                $edit= false;
+                $checkid=0;
+                header("location:FarmerActiveOrders.php");
+            }
+
+            if(isset($_GET['delete_btn']))
+            {
+                $id=$_GET['delete_btn'];
+                echo $id;
+                $result= $mysqli->query("delete from product where Product_ID=$id")or   
+                                    die ($mysqli->error);
+                header("location:FarmerActiveOrders.php");
+            }
+
+    /*------------------------------------------------------------*/
+    /*--------------------------Auction---------------------------*/
+
+                if(isset($_GET['adelete_btn']))
+                {
+                    $id=$_GET['adelete_btn'];
+                    $result= $mysqli->query("delete from product where Product_ID=$id")or   
+                                        die ($mysqli->error);
+                    header("location:FarmerActiveOrders.php");
+                }
+
+    /*------------------------------------------------------------*/
+
+
+
+?>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Profile</title>
+
+    <!-- Bootstrap CSS CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <!-- Our Custom CSS -->
+    <link rel="stylesheet" href="..\Profile\css\style.css?v=<?php echo time(); ?>">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Font Awesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #fafafa;">
+        <div class="container-fluid">
+        <a href="..\Index\LandingPage.php"><img src="images/logo.png" style="width:120px;height:40px;" /></a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav mr-auto">
+              <a class="nav-link" href="..\Index\LandingPage.php">Home</a>
+              <?php if(isset($_SESSION['auction'])){ ?>
+                <a class="nav-link" href="..\SellForm.php">Sell your product</a>
+              <?php } ?>
+              <a class="nav-link" href="..\Index\Auction.php">Auction</a>
+            </div>
+            <a class="nav-link" href="..\Index\Logout.php">Logout</a>
+          </div>
+        </div>
+      </nav>
+      
+    <div class="wrapper">
+        <!-- Sidebar  -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>Hey &nbsp<?php echo $name; ?></h3>
+            </div>
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="profile.php">Profile</a>
+                </li>
+                <?php if(isset($_SESSION['auction'])){ ?>
+                    <li class="active">
+                        <a href="FarmerActiveOrders">Active orders</a>
+                    </li>
+                    <li>
+                        <a href="FarmerProductHistory.php">Product history</a>
+                    </li>
+                <?php } ?>
+
+                <li>
+                    <a href="ConsumerOrders.php">Orders placed</a>
+                </li>
+
+            </ul>
+        </nav>
+        <!-- Page Content  -->
+        <div id="content">
+            <div class="user-details">
+            <div class="form-group text-center">
+                </div>
+                <div id="ShopDiv">
+        <!---------------------------------------------SHOP---------------------------------->
+                <h4>Shop</h4>
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th class="table-class">Product</th>
+                                <th class="table-class">Type</th>
+                                <th class="table-class">Stock left</th>
+                                <th class="table-class">Price</th>
+                                <th class="table-class">Action</th>
+                                <th class="table-class">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php while($row = mysqli_fetch_assoc($result)) { ?>
+                            <tr>
+                                <td><?php echo $row['Name']; ?></td>
+                                <td><?php echo $row['Type']; ?></td>
+                                <td><?php echo $row['Stock']; ?></td>
+                                <td><?php echo $row['Price']; ?></td>
+                                <td>
+                                    <form action="" method="post">
+    
+                                    <input type="<?php if($checkid == $row['Product_ID']) echo ""; else echo "hidden" ; ?>"
+                                                     name="update_id" value="<?php echo $row['Product_ID']; ?>">
+                                    <input type="hidden" name="hid" value="<?php if($checkid== $row['Product_ID']) echo $checkid;
+                                                                                     else echo $row['Product_ID']; ?>">
+                                    
+                                    <?php if($edit==false){ ?>
+                                         <button type="submit" name="update_btn" class="btn btn-warning"> UPDATE</button>
+                                    <?php }if($edit==true && $checkid != $row['Product_ID']){ ?>    
+                                        <button type="submit" name="update_btn" class="btn btn-warning"> UPDATE</button>
+                                    <?php }if($edit==true && $checkid == $row['Product_ID']){?>    
+                                        <button type="submit" name="ok_btn" class="btn btn-info"> OK</button>
+                                    <?php } ?>
+
+
+                                    </form>
+                                </td>
+                                <td>
+                                <form action="" method="post">
+                                        
+                                    <a href="FarmerActiveORders.php?delete_btn=<?php echo $row['Product_ID']; ?>" name="delete_btn" class="btn btn-danger">
+                                                 DELETE</a>
+                                
+                                </form>
+                                </td>
+                            </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="AuctionDiv" class="">
+         <!-----------------------------------------------AUCTION------------------------>       
+                <h4>Auction</h4>
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th class="table-class">Product</th>
+                            <th class="table-class">Type</th>
+                            <th class="table-class">Stock left</th>
+                            <th class="table-class">Starting bid</th>
+                            <th class="table-class">Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php while($row2 = mysqli_fetch_assoc($result2)) { ?>
+                            <tr>
+                                <td><?php echo $row2['Name']; ?></td>
+                                <td><?php echo $row2['Type']; ?></td>
+                                <td><?php echo $row2['Stock']; ?></td>
+                                <td><?php echo $row2['Price']; ?></td>
+                                <td>
+                                <form action="" method="post">
+                                
+                                <a href="FarmerActiveORders.php?adelete_btn=<?php echo $row['Product_ID']; ?>" name="adelete_btn" class="btn btn-danger">
+                                                 DELETE</a>
+                                
+                                </form>
+                                </td>
+                            </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- <div class="col-6"></div> -->
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery CDN - Slim version (=without AJAX) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <!-- Popper.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+            });
+        });
+    </script>
+</body>
+
+</html>
